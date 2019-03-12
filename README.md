@@ -39,10 +39,20 @@ This class has method `calibrate()`.
 In this method we are iterating through the calibration images to find chessbord corners on them and after that use them in `cv2.calibrateCamera()`.
 Once calibrated, camera object can be used for image undistortion by calling `undistort()`.
 
+Distorted and undistorted images:
+
+<img src="./output_images/distorted.jpg" width = "420" height = "250" align=center/>   <img src="./output_images/undistorted.jpg" width = "420" height = "250" align=center/>
+
+
+
 ### Perspective transformation
 
 Next step is transforming an image to the bird-eye-view. It makes farther detection process much more esier. 
 In order to transform perspective i created method `warpPerspective` in the class `camera`. This method just call `cv2.warpPerspective()` with specific parameters.
+
+Transformed image:
+
+<img src="./output_images/transformed.jpg" width = "420" height = "250" align=center/>
 
 Source points | destination points
 --- | --- 
@@ -62,8 +72,13 @@ For this reasone I've used following thresholds:
 * Sobel direction
 * Sobel absolute in X and Y directions
 
+Thresholded image:
+
+<img src="./output_images/thresholded.jpg" width = "420" height = "250" align=center/>
+
 All this threshold implemented in module `preprocessing.py`. 
-Function `preprocess_img()` combines all the threshold masks with condition `(((sobel_mask == 1) & (sobel_mask_mag == 1) ) | (sobel_x == 1) & (sobel_y == 1)  | ((hls_s_mask == 1) | (lab_mask == 1) | (hls_mask == 1)))`
+Function `preprocess_img()` combines all the threshold masks with condition: 
+`(((sobel_mask == 1) & (sobel_mask_mag == 1) ) | (sobel_x == 1) & (sobel_y == 1)  | ((hls_s_mask == 1) | (lab_mask == 1) | (hls_mask == 1)))`
 
 ## Line detection
 
@@ -80,12 +95,24 @@ Sliding window search algorithm:
 3. Use this points as starting points
 4. Create a box witsh center at this base point
 5. If in number of pixel in this box big enough, move box up and averege x position with inner points
-6. Repit this for whole image
+6. Repeat this for whole image
+
+Sliding windows:
+
+<img src="./output_images/sliding_windows.png" width = "420" height = "250" align=center/>   <img src="./output_images/histogram.png" width = "420" height = "250" align=center/>
 
 Sliding window algorithm implemented in module `detection.py` in function `find_with_sliding_windows()`. This function returns object of type `Line`
+
 
 ### Tracking of found line
 
 Once we detect the line we don't need to use sliding window until we lost the line. Instead, we are searshing for new points around line that was found on a previous frame.
+
+Line tracking:
+
+<img src="./output_images/tracking.png" width = "420" height = "250" align=center/>
+
 This tracking is implemented in `detection.py` in method `find_within_line_range()`
+
+
 
