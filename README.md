@@ -1,5 +1,7 @@
 ## Advanced Lane Finding Project
 
+<img src="./output_images/output.gif" align=center/>
+
 The goals / steps of this project are the following:
 
 * Compute the camera calibration matrix and distortion coefficients given a set of chessboard images.
@@ -113,6 +115,30 @@ Line tracking:
 <img src="./output_images/tracking.png" width = "420" height = "250" align=center/>
 
 This tracking is implemented in `detection.py` in method `find_within_line_range()`
+
+### Lines history
+
+Every time line updates it consider previous fund lines, so I just calculate average value between new line and previous one to make line more stable.
+
+### Lane curvature and distance to center
+
+Module `detection.py` contains methods for calculation curvature radius and distance to center
+`curvature_radius()` and `calculate_diff_from_center()`
+
+### Posible problems and improvements
+
+At the moment, it works not quite good with challenge_video and harder_challenge_video. Also sometimes it has problems with bright areas. To make it works better on this examples I need to improve thresholding and play a little bit with it's parameters.
+
+
+### Final result
+
+<img src="./output_images/output_with_debug.gif" align=center/>
+
+
+### Full video
+
+Full video can be downloaded [here](./output_images/output_with_debug.mp4)
+
 
 
 
