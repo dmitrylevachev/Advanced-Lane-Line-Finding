@@ -1,19 +1,4 @@
-## Advanced Lane Finding
-[![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
-![Lanes Image](./examples/example_output.jpg)
-
-In this project, your goal is to write a software pipeline to identify the lane boundaries in a video, but the main output or product we want you to create is a detailed writeup of the project.  Check out the [writeup template](https://github.com/udacity/CarND-Advanced-Lane-Lines/blob/master/writeup_template.md) for this project and use it as a starting point for creating your own writeup.  
-
-Creating a great writeup:
----
-A great writeup should include the rubric points as well as your description of how you addressed each point.  You should include a detailed description of the code used in each step (with line-number references and code snippets where necessary), and links to other supporting documents or external references.  You should include images in your writeup to demonstrate how your code works with examples.  
-
-All that said, please be concise!  We're not looking for you to write a book here, just a brief description of how you passed each rubric point, and references to the relevant code :). 
-
-You're not required to use markdown for your writeup.  If you use another method please just submit a pdf of your writeup.
-
-The Project
----
+## Advanced Lane Finding Project
 
 The goals / steps of this project are the following:
 
@@ -26,14 +11,81 @@ The goals / steps of this project are the following:
 * Warp the detected lane boundaries back onto the original image.
 * Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position.
 
-The images for camera calibration are stored in the folder called `camera_cal`.  The images in `test_images` are for testing your pipeline on single frames.  If you want to extract more test images from the videos, you can simply use an image writing method like `cv2.imwrite()`, i.e., you can read the video in frame by frame as usual, and for frames you want to save for later you can write to an image file.  
+## Running
 
-To help the reviewer examine your work, please save examples of the output from each stage of your pipeline in the folder called `output_images`, and include a description in your writeup for the project of what each image shows.    The video called `project_video.mp4` is the video your pipeline should work well on.  
+In order to run this pipeline you should run `laneFinder.py` with following parameters:
 
-The `challenge_video.mp4` video is an extra (and optional) challenge for you if you want to test your pipeline under somewhat trickier conditions.  The `harder_challenge.mp4` video is another optional challenge and is brutal!
+  `--vid` in case if input is a video, path to the source video file
 
-If you're feeling ambitious (again, totally optional though), don't stop there!  We encourage you to go out and take video of your own, calibrate your camera and show us how you would implement this project from scratch!
+  `--img` in case if input is an image, path to the source image file
 
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
+  `--cal` path to the directory with callibration images (default: `../camera_cal`)
+
+  `--o_dir` the path to the output directory (default: `../output_images`)
+
+  `--o_name` the name of the output file (default: `output.mp4`)
+  
+## Preprocessing
+
+### Camera calibration
+
+An image, that camera captures is inperfect. Because of camera's lenses phisical properties, images, that created by camera contains some distortion in it.
+But for lane lines detection we need that camera's image represents real world without any kind of distortion.
+
+In this reason, first thing that we should do is calibrate the camera.
+
+To do that I created module `camera.py` that contains class with the same name `camera`. 
+This class has method `calibrate()`. 
+In this method we are iterating through the calibration images to find chessbord corners on them and after that use them in `cv2.calibrateCamera()`.
+Once calibrated, camera object can be used for image undistortion by calling `undistort()`.
+
+### Perspective transformation
+
+Next step is transforming an image to the bird-eye-view. It makes farther detection process much more esier. 
+In order to transform perspective i created method `warpPerspective` in the class `camera`. This method just call `cv2.warpPerspective()` with specific parameters.
+
+Source points | destination points
+--- | --- 
+[579.681, 458.913] | [350, 0]
+[703.423, 458.913] | [850, 0]
+[1114.42, 720] | [850, 720]
+[198.078, 720] | [350, 720]
+
+### Color and Gradient thresholding
+
+After perspective transformation we need to separate lane lines pexels from any other pixels. 
+For this reasone I've used following thresholds:
+
+* HLS color space L- and S-channels
+* LAB color space B-channel
+* Sobel magnitude 
+* Sobel direction
+* Sobel absolute in X and Y directions
+
+All this threshold implemented in module `preprocessing.py`. 
+Function `preprocess_img()` combines all the threshold masks with condition `(((sobel_mask == 1) & (sobel_mask_mag == 1) ) | (sobel_x == 1) & (sobel_y == 1)  | ((hls_s_mask == 1) | (lab_mask == 1) | (hls_mask == 1)))`
+
+## Line detection
+
+### Line
+
+For more convinient work I've created class `Line` that incapsulate methods and fields that allow to save the state of detected line such as if line is detected or line coeficents.
+
+### Sliding windows
+
+To detect lines I've used sliding window approach.
+Sliding window search algorithm:
+1. Calculate histogram based on bottom half of the image.
+2. Find x points with max y value on this histogram
+3. Use this points as starting points
+4. Create a box witsh center at this base point
+5. If in number of pixel in this box big enough, move box up and averege x position with inner points
+6. Repit this for whole image
+
+Sliding window algorithm implemented in module `detection.py` in function `find_with_sliding_windows()`. This function returns object of type `Line`
+
+### Tracking of found line
+
+Once we detect the line we don't need to use sliding window until we lost the line. Instead, we are searshing for new points around line that was found on a previous frame.
+This tracking is implemented in `detection.py` in method `find_within_line_range()`
 
