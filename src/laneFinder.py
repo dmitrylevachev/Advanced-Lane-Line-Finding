@@ -73,10 +73,10 @@ def print_information_text(img, detected_lines):
     cv2.putText(img, "Curvature radius: {0:.2f} m".format(detected_lines[0].curvature_radius(img.shape[0])), (20,40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,255), 2)
 
     diff = det.calculate_diff_from_center(img, detected_lines)
-    if diff < 0:
-        cv2.putText(img, "{0:.2f} m right of center".format(diff), (20,80), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,255), 2)
+    if diff < 0.:
+        cv2.putText(img, "{0:.2f} m right of center".format(np.absolute(diff)), (20,80), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,255), 2)
     else:
-        cv2.putText(img, "{0:.2f} m left of center".format(diff), (20,80), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,255), 2)
+        cv2.putText(img, "{0:.2f} m left of center".format(np.absolute(diff)), (20,80), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,255), 2)
 
     if detected_lines[0].detected:
         cv2.putText(img, "Left line detected", (20,120), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,0), 2)
@@ -106,7 +106,7 @@ def process_frame(frame, detected_lines, camera):
 def process_video(input_path, output_path, camera):
     cap = cv2.VideoCapture(input_path)
     fourcc = cv2.VideoWriter_fourcc(*'MP42')
-    writer = cv2.VideoWriter(output_path, fourcc, 20.0, (int(cap.get(3)), int(cap.get(4))))
+    writer = cv2.VideoWriter(output_path, fourcc, 20.0, (int(cap.get(3)), int(cap.get(4)*0.5)))
     detected_lines = (det.Line(), det.Line())
     
     while(cap.isOpened()):

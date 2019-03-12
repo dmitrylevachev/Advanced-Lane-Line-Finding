@@ -47,9 +47,11 @@ class Line():
         return line_zone
 
     def curvature_radius(self, y):
-        A = self.fit[0]
-        B = self.fit[1]
         ym_per_pix = 30/720
+        xm_per_pix = 3.7/700
+        source_y = np.array(self.source_points[0]) * ym_per_pix
+        source_x = np.array(self.source_points[1]) * xm_per_pix
+        A, B, C = np.polyfit(source_y, source_x, 2)        
         y_real =  y * ym_per_pix
         return (1 + (2 * A * y_real + B)**2)**(1.5) / np.absolute(2 * A)
         
@@ -160,9 +162,8 @@ def detect_line(binary, lines):
 
     if not lines[0].detected or not lines[1].detected:
         if lefty != [] and leftx != [] and righty != [] and rightx != []:
-            line1 = Line(np.polyfit(lefty, leftx, 2))
-            line2 = Line(np.polyfit(righty, rightx, 2))
-            lines = (line1, line2)
+            lines[0].update(lefty, leftx)
+            lines[1].update(righty, rightx)
             lines[0].detected = True
             lines[1].detected = True
     else:
