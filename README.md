@@ -15,7 +15,7 @@ The goals / steps of this project are the following:
 
 ## Running
 
-In order to run this pipeline you should run `laneFinder.py` with following parameters:
+In order to run this pipeline you should run `laneFinder.py` in `src/` folder with following parameters:
 
   `--vid` in case if input is a video, path to the source video file
 
