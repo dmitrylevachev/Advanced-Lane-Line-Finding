@@ -71,15 +71,24 @@ def draw_search_area(img, lines):
 
 def print_information_text(img, detected_lines):
     cv2.putText(img, "Curvature radius: {0:.2f} m".format(detected_lines[0].curvature_radius(img.shape[0])), (20,40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,255), 2)
-    if detected_lines[0].detected:
-        cv2.putText(img, "Left line detected", (20,80), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,0), 2)
+
+    diff = det.calculate_diff_from_center(img, detected_lines)
+    if diff < 0:
+        cv2.putText(img, "{0:.2f} m right of center".format(diff), (20,80), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,255), 2)
     else:
-        cv2.putText(img, "Left line lost", (20,80), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2)
+        cv2.putText(img, "{0:.2f} m left of center".format(diff), (20,80), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,255), 2)
+
+    if detected_lines[0].detected:
+        cv2.putText(img, "Left line detected", (20,120), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,0), 2)
+    else:
+        cv2.putText(img, "Left line lost", (20,120), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2)
 
     if detected_lines[1].detected:
-        cv2.putText(img, "Right line detected", (20,120), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,0), 2)
+        cv2.putText(img, "Right line detected", (20,160), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,0), 2)
     else:
-        cv2.putText(img, "Right line lost", (20,120), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2)
+        cv2.putText(img, "Right line lost", (20,160), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2)
+
+    
     return img
 
 def process_frame(frame, detected_lines, camera):
@@ -97,7 +106,7 @@ def process_frame(frame, detected_lines, camera):
 def process_video(input_path, output_path, camera):
     cap = cv2.VideoCapture(input_path)
     fourcc = cv2.VideoWriter_fourcc(*'MP42')
-    writer = cv2.VideoWriter(output_path, fourcc, 20.0, (int(cap.get(3)), int(cap.get(4)*0.5)))
+    writer = cv2.VideoWriter(output_path, fourcc, 20.0, (int(cap.get(3)), int(cap.get(4))))
     detected_lines = (det.Line(), det.Line())
     
     while(cap.isOpened()):
@@ -147,3 +156,8 @@ if __name__ == "__main__":
         print('img')
         input_path = args['img']
         process_image(input_path, output_path, camera)
+
+        img = cv2.imread('../camera_cal/calibration1.jpg')
+        cv2.imwrite('../output_images/distorted.jpg', img)
+        cv2.imwrite('../output_images/undistorted.jpg', camera.undistort(img))
+        

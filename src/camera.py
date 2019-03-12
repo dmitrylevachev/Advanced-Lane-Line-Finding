@@ -18,10 +18,10 @@ class Camera():
         img_shape = []
 
         for name in file_names:
-            image = mpimg.imread(path + '/' + name)
+            image = cv2.imread(path + '/' + name)
             obj_p = np.zeros((9*6,3), np.float32)
             obj_p[:, :2] = np.mgrid[0:9, 0:6].T.reshape(-1,2)
-            gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
             img_shape = gray.shape[::-1]
             ret, corners = cv2.findChessboardCorners(gray, (9,6), None)
 

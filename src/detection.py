@@ -78,6 +78,18 @@ class Line():
         new_image[self.source_points[0], self.source_points[1]] = color
         return new_image
 
+def calculate_diff_from_center(img, detected_lines):
+    line2_bottom = detected_lines[1].get_points(img)[1][img.shape[0] - 1]   
+    line1_bottom = detected_lines[0].get_points(img)[1][img.shape[0] - 1]
+
+    lane_center = line1_bottom + (line2_bottom - line1_bottom) // 2
+    car_center = img.shape[1] // 2
+
+    diff = lane_center - car_center
+    x_real =  3.7/700
+    diff *= x_real
+    return diff
+
 
 def estimate_basises(img):
     bottom_half = img[img.shape[0]//2:,:]
